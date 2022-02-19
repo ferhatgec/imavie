@@ -52,12 +52,31 @@ void imavie::run(std::string const file_name) noexcept {
 
         stbi_image_free(val);
     } else {
-        std::cerr << "Alpha channel does not supported yet\n";
-        return;
+        int w = 0, h = 0, glob_y = 0;
+        unsigned char* val = stbi_load(file_name.c_str(), &w, &h, &this->comp, STBI_default);
+        this->data.resize(w, std::vector<climage_rgb>(h, climage_rgb {
+            .r = 0, .g = 0, .b = 0
+        }));
+
+        for(unsigned x = 0; x < w; x++) {
+            for(unsigned y = 0; y < h; y++) {
+                this->data[x][y].r = static_cast<unsigned>(val[glob_y++]);
+                this->data[x][y].g = static_cast<unsigned>(val[glob_y++]);
+                this->data[x][y].b = static_cast<unsigned>(val[glob_y++]);
+
+                ++glob_y;
+            }
+        }
+
+        this->parse.layer = this->data;
+        this->parse.generate();
+
+        stbi_image_free(val);
     }
 
     sdl4::video::window::window wnd;
     sdl4::video::window::renderer::renderer renderer;
+
 
     if(sdl4::init(SDL_INIT_VIDEO) != 0) return;
 
@@ -65,6 +84,7 @@ void imavie::run(std::string const file_name) noexcept {
                                       this->res_y,
                                       0,
                                       &renderer) == 0) {
+        wnd.set_window_title("imavie - " + file_name);
         unsigned x = 0, y = 0, i = 0;
         for(auto& line: this->data) {
             va: for(auto& child: line) {
@@ -86,7 +106,7 @@ void imavie::run(std::string const file_name) noexcept {
 
 int main(int argc, char const* const* argv) noexcept {
     if(argc < 2) {
-        std::cout << "imavie - climage and jpeg viewer\n"
+        std::cout << "imavie - climage, jpeg and png viewer\n"
                     "------\n" <<
                     argv[0] << " {file}\n" <<
                     argv[0] << " {file} {x} {y} {scale_ratio}\n";

@@ -1,6 +1,8 @@
 # imavie
 ## [clivie](https://github.com/ferhatgec/clivie) + [stb](https://github.com/nothings/stb)
 
+![poljg, a character in gechland (game)](resource/window.png) 
+
 ```
 external requirements:
 
